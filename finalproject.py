@@ -1,126 +1,162 @@
-import csv                                    #need to import when using .csv file
-from replit import clear                 #for using clear function      
+import csv
+import os
+from prettytable import from_csv
 
-def add(backnumber):                          #using add function when you want to add like backnumber and name into .csv file
-    about_player = {}                     
+FILE_NAME = "About_player.csv"
+COACH_PASSWORD = '2135647'
 
-    about_player["backnumber"] = backnumber
-    about_player["name"] =  input("Enter name of the player: ")
-    about_player["team"] = input('Enter team of the player: ')
-    about_player["age"] = input('Enter age of the player: ') 
 
-    fieldnames = []
-    for key in about_player:
-        fieldnames.append(key)
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-    with open("About_player.csv", "a") as data_file:
-        writer = csv.DictWriter(data_file, fieldnames)
-        writer.writerow(about_player)
 
-def search(search_with, search_data):  #using search function if you want to search some in .csv file
-    answer = []
+def add(backnumber):
+    about_player = {
+        "backnumber": backnumber,
+        "name": input("Enter name of the player: "),
+        "team": input('Enter team of the player: '),
+        "age": input('Enter age of the player: ')
+    }
 
-    with open("About_player.csv", "r") as data_file:
-        players_data = csv.DictReader(data_file)
+    fieldnames = list(about_player.keys())
 
-        for player in players_data:
-            if player[search_with] == search_data:
-                answer.append(player)
+    try:
+        with open(FILE_NAME, "a", newline='') as data_file:
+            writer = csv.DictWriter(data_file, fieldnames)
+            writer.writerow(about_player)
+    except Exception as e:
+        print(f"Error writing to file: {e}")
 
-        print(answer['name']) 
 
-def delete(players):     #using delete function if you want to delete some in .csv file
-    lines = list()
+def search(search_with, search_data):
+    results = []
 
-    with open('About_player.csv', 'r') as readFile:
-        reader = csv.reader(readFile)
+    try:
+        with open(FILE_NAME, "r") as data_file:
+            players_data = csv.DictReader(data_file)
+            for player in players_data:
+                if player[search_with] == search_data:
+                    results.append(player)
+    except Exception as e:
+        print(f"Error reading file: {e}")
 
-        for row in reader:
-            lines.append(row)
+    if results:
+        for player in results:
+            print(player)
+    else:
+        print("No matching player found.")
 
-            for field in row:
-                if field == players:    
-                    lines.remove(row)
 
-    with open('About_player.csv', 'w') as writeFile:
-        writer = csv.writer(writeFile)
-        writer.writerows(lines)
+def delete(backnumber):
+    lines = []
 
-def edit():          #using delete function if you want to edit some in .csv file
-    df = input("Enter a player's backnumber you want to edit:")
-    delete(df)
-    add(df)
+    try:
+        with open(FILE_NAME, 'r') as readFile:
+            reader = csv.reader(readFile)
+            for row in reader:
+                if row and row[0] != backnumber:
+                    lines.append(row)
+    except Exception as e:
+        print(f"Error reading file: {e}")
 
-ask = input("Do you want to start(yes/no)?:") #ask user to you want to start
+    try:
+        with open(FILE_NAME, 'w', newline='') as writeFile:
+            writer = csv.writer(writeFile)
+            writer.writerows(lines)
+    except Exception as e:
+        print(f"Error writing to file: {e}")
 
-while ask == 'yes':  #while user type yes
-    clear()          #clear terminal
-    final_input = input("Who Are you(coach/fan)?: ")        #ask user that who are you
-    if final_input == 'coach':   #if user said coach
-        password = input("Enter a password of coach:")   #told user to type password
 
-        if password == '2135647':   #if password was true 
-            user_input = input("Do you want to (add/search/delete/edit)player?: ") #ask user what do you want to do
+def edit():
+    backnumber = input("Enter a player's backnumber you want to edit: ")
+    delete(backnumber)
+    add(backnumber)
 
-            if  user_input == "add":   #if user type add then ask backnumber,name,team,age and add into .csv file
-                clear()
-                file = open("About_player.csv")
-                reader = csv.reader(file)
-                lines= len(list(reader))
-                add(lines)
-                from prettytable import from_csv
-                with open("About_player.csv") as fp:
-                    mytable = from_csv(fp)
-                    print(mytable)
-                print("YOUR PLAYER BACKNUMBER IS",lines)
-                print("Done")
 
-            if user_input == 'search':  #if user type search then ask backnumber,name,team,age and print about the backnumber of the player
-                clear()
-                z = input("What do you want to seach player with?(backnumber/name/team/age): ")
-                print("Enter a",z,'of the player')
-                o = input(":")
-                search(z,o)
+def display_table():
+    try:
+        with open(FILE_NAME) as fp:
+            mytable = from_csv(fp)
+            print(mytable)
+    except Exception as e:
+        print(f"Error reading file: {e}")
 
-            if user_input == 'delete':   #if user type delete then ask backnumber and delete all about backnumber of the player
-                clear()
-                from prettytable import from_csv
-                with open("About_player.csv") as fp:
-                    mytable = from_csv(fp)
-                    print(mytable)
-                finalll = input("Enter a backnumber you want to delete:")
-                delete(finalll)
-                clear()
-                with open("About_player.csv") as fp:
-                    mytable = from_csv(fp)
-                    print(mytable)
-                print("Done")
 
-            if user_input == 'edit': #if user type edit then ask backnumber and edit name,team,age of the player
-                clear()
-                from prettytable import from_csv
-                with open("About_player.csv") as fp:
-                    mytable = from_csv(fp)
-                    print(mytable)
-                edit()
-                clear()
-                from prettytable import from_csv
-                with open("About_player.csv") as fp:
-                    mytable = from_csv(fp)
-                    print(mytable)
-                print("Done")
-        
-        if password != '2135647':   #if user type wrong password
-            print("Wrong Password")  #print Wrong password
+def main():
+    ask = input("Do you want to start(yes/no)?: ").strip().lower()
 
-    if final_input == 'fan':  #if user type 'fan' then user can only search about the player
-        print("YOU CAN ONLY SEARCH IF YOU ARE JUST A FAN")
-        z = input("What do you want to seach player with?(backnumber/name/team/age): ")
-        print("Enter a",z,'of the player')
-        o = input(":")
-        search(z,o)                         
-   
-    ask = input("Do you want to start again?:")  #if all finish then ask user to start again
+    while ask == 'yes':
+        clear()
+        user_role = input("Who Are you(coach/fan)?: ").strip().lower()
 
-if ask == 'no': #if user type no 
-    print("OK")#print ok
+        if user_role == 'coach':
+            password = input("Enter the coach's password: ")
+
+            if password == COACH_PASSWORD:
+                action = input(
+                    "Do you want to (add/search/delete/edit) player?: ").strip(
+                    ).lower()
+
+                if action == "add":
+                    clear()
+                    with open(FILE_NAME) as file:
+                        reader = csv.reader(file)
+                        lines = len(list(reader))
+                    add(lines)
+                    display_table()
+                    print("YOUR PLAYER BACKNUMBER IS", lines)
+                    print("Done")
+
+                elif action == 'search':
+                    clear()
+                    search_with = input(
+                        "What do you want to search player with? (backnumber/name/team/age): "
+                    ).strip().lower()
+                    search_data = input(
+                        f"Enter the {search_with} of the player: ").strip()
+                    search(search_with, search_data)
+
+                elif action == 'delete':
+                    clear()
+                    display_table()
+                    backnumber = input(
+                        "Enter the backnumber you want to delete: ").strip()
+                    delete(backnumber)
+                    clear()
+                    display_table()
+                    print("Done")
+
+                elif action == 'edit':
+                    clear()
+                    display_table()
+                    edit()
+                    clear()
+                    display_table()
+                    print("Done")
+
+                else:
+                    print("Invalid action")
+
+            else:
+                print("Wrong Password")
+
+        elif user_role == 'fan':
+            print("YOU CAN ONLY SEARCH IF YOU ARE JUST A FAN")
+            search_with = input(
+                "What do you want to search player with? (backnumber/name/team/age): "
+            ).strip().lower()
+            search_data = input(
+                f"Enter the {search_with} of the player: ").strip()
+            search(search_with, search_data)
+
+        else:
+            print("Invalid role")
+
+        ask = input("Do you want to start again? (yes/no): ").strip().lower()
+
+    if ask == 'no':
+        print("OK")
+
+
+if __name__ == "__main__":
+    main()
